@@ -70,18 +70,39 @@ public class auto_sensor_test extends LinearOpMode {
     private DcMotor motorRightDriveDown = null;
     private DcMotor motorXrailDrive = null;
     private DcMotor motorSpinnerDrive = null;
-    private DcMotor motorSpinnerDrive_left = null;
+   // private DcMotor motorSpinnerDrive_left = null;
     private CRServo servoTilterDrive = null;
+    private CRServo rightservoDrive = null;
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
      DigitalChannel bump;
     private DistanceSensor ds;
 
-    private WebcamName webcam = null;
+
+    // private WebcamName webcam = null;
 
 
     @Override
     public void runOpMode() {
+        while(ds.getDistance((DistanceUnit.CM))<5){
+
+            motorLeftDriveUp.setDirection(DcMotor.Direction.FORWARD);
+            motorRightDriveUp.setDirection(DcMotor.Direction.REVERSE);
+            motorLeftDriveDown.setDirection(DcMotor.Direction.FORWARD);
+            motorRightDriveDown.setDirection(DcMotor.Direction.REVERSE);
+
+            motorLeftDriveDown.setPower(.1);
+            motorRightDriveDown.setPower(.1);
+            motorLeftDriveUp.setPower(.1);
+            motorRightDriveUp.setPower(.1);
+            telemetry.addData("Distance", ds.getDistance(DistanceUnit.CM));
+            telemetry.update();
+        }
+        motorLeftDriveDown.setPower(0);
+        motorRightDriveDown.setPower(0);
+        motorLeftDriveUp.setPower(0);
+        motorRightDriveUp.setPower(0);
+
 
 
         telemetry.addData("Status", "Initialized");
@@ -112,11 +133,12 @@ public class auto_sensor_test extends LinearOpMode {
         motorRightDriveDown = hardwareMap.get(DcMotor.class, "right_motor_down");
         motorXrailDrive = hardwareMap.get(DcMotor.class, "xrail_motor");
         motorSpinnerDrive = hardwareMap.get(DcMotor.class, "spinner_motor");
-        motorSpinnerDrive_left = hardwareMap.get(DcMotor.class, "spinner_left");
+      //  motorSpinnerDrive_left = hardwareMap.get(DcMotor.class, "spinner_left");
         servoTilterDrive = hardwareMap.get(CRServo.class, "tilter_servo");
-        bump = hardwareMap.get(DigitalChannel.class, "ts");
+        rightservoDrive = hardwareMap.get(CRServo.class, "right_servo");
 
-        ds = hardwareMap.get(DistanceSensor.class,"reach");
+        bump = hardwareMap.get(DigitalChannel.class, "ts");
+        ds = hardwareMap.get(DistanceSensor.class,"back_ds");
 
         double motorSpeed = 1;
         double xrailSpeed = .5;
@@ -144,8 +166,9 @@ public class auto_sensor_test extends LinearOpMode {
         motorRightDriveDown.setDirection(DcMotor.Direction.REVERSE);
         motorXrailDrive.setDirection(DcMotor.Direction.REVERSE);
         motorSpinnerDrive.setDirection(DcMotor.Direction.FORWARD);
-        motorSpinnerDrive.setDirection(DcMotor.Direction.FORWARD);
         servoTilterDrive.setDirection(CRServo.Direction.REVERSE);
+       // motorSpinnerDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightservoDrive.setDirection(CRServo.Direction.REVERSE);
         bump.setMode(DigitalChannel.Mode.INPUT);
         Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)ds;
         telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
@@ -156,9 +179,27 @@ public class auto_sensor_test extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
-        //tilt(700, .6);
         //move_forwarde(7);
         //sleep(1600);
+
+
+
+
+
+
+
+       /*
+
+        path1();
+sleep(2000);
+path2(5,4000,1);
+     */
+/*
+      while(bump.getState()==true){
+tilt(1500,1);
+      }
+      */
+
 
 /*
         if(bump.getState()==false){
@@ -180,17 +221,24 @@ public class auto_sensor_test extends LinearOpMode {
                 path1();
             }
             */
-       double dist= ds.getDistance(DistanceUnit.INCH);
+        /*
+move_backward(2);
+
+        if (bump.getState()==true) {
+            move_backward(1);
+        }
+*/
 
 
 
-       while(ds.getDistance(DistanceUnit.INCH)>20 && bump.getState()==true) {
-           move_back();
-       }
 
-//if(ds.getDistance(DistanceUnit.INCH)<8) {
-   // move_forward(2);
-//}
+
+/*
+if(ds.getDistance(DistanceUnit.INCH)<8) {
+    move_forward(2);
+}
+*/
+ 
 
 
 // Blue side near Spinner end
@@ -266,7 +314,7 @@ public class auto_sensor_test extends LinearOpMode {
 
    private void moveXrail(double inches) {
         int ticks = inchesToTicksXrail(inches);
-        motorXrailDrive.setDirection(DcMotor.Direction.FORWARD);
+        motorXrailDrive.setDirection(DcMotor.Direction.REVERSE);
         motorXrailDrive.setTargetPosition(ticks);
         motorXrailDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorXrailDrive.setPower(0.5);
@@ -299,10 +347,11 @@ public class auto_sensor_test extends LinearOpMode {
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        motorLeftDriveDown.setDirection(DcMotor.Direction.REVERSE);
-        motorRightDriveDown.setDirection(DcMotor.Direction.FORWARD);
-        motorLeftDriveUp.setDirection(DcMotor.Direction.REVERSE);
-        motorRightDriveUp.setDirection(DcMotor.Direction.FORWARD);
+        motorLeftDriveUp.setDirection(DcMotor.Direction.FORWARD);
+        motorRightDriveUp.setDirection(DcMotor.Direction.REVERSE);
+        motorLeftDriveDown.setDirection(DcMotor.Direction.FORWARD);
+        motorRightDriveDown.setDirection(DcMotor.Direction.REVERSE);
+
 
         // reset encoder counts kept by motors.
         motorLeftDriveDown.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -323,10 +372,10 @@ public class auto_sensor_test extends LinearOpMode {
         motorLeftDriveUp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorRightDriveUp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        motorLeftDriveDown.setPower(1);
-        motorRightDriveDown.setPower(1);
-        motorLeftDriveUp.setPower(1);
-        motorRightDriveUp.setPower(1);
+        motorLeftDriveDown.setPower(.1);
+        motorRightDriveDown.setPower(.1);
+        motorLeftDriveUp.setPower(.1);
+        motorRightDriveUp.setPower(.1);
 
         while (opModeIsActive() && motorLeftDriveDown.isBusy())   //leftMotor.getCurrentPosition() < leftMotor.getTargetPosition())
         {
@@ -427,10 +476,11 @@ public class auto_sensor_test extends LinearOpMode {
         int total_ticks = getTotal_ticks(x);
 
         // Changing the motor direction to go backward
-        motorLeftDriveDown.setDirection(DcMotor.Direction.FORWARD);
-        motorRightDriveDown.setDirection(DcMotor.Direction.REVERSE);
-        motorLeftDriveUp.setDirection(DcMotor.Direction.FORWARD);
-        motorRightDriveUp.setDirection(DcMotor.Direction.REVERSE);
+
+        motorLeftDriveUp.setDirection(DcMotor.Direction.REVERSE);
+        motorRightDriveUp.setDirection(DcMotor.Direction.FORWARD);
+        motorLeftDriveDown.setDirection(DcMotor.Direction.REVERSE);
+        motorRightDriveDown.setDirection(DcMotor.Direction.FORWARD);
 
 
         // reset encoder counts kept by motors.
@@ -453,10 +503,10 @@ public class auto_sensor_test extends LinearOpMode {
         motorRightDriveUp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
-        motorLeftDriveDown.setPower(.5);
-        motorRightDriveDown.setPower(.5);
-        motorLeftDriveUp.setPower(.5);
-        motorRightDriveUp.setPower(.5);
+        motorLeftDriveDown.setPower(.7);
+        motorRightDriveDown.setPower(.7);
+        motorLeftDriveUp.setPower(.7);
+        motorRightDriveUp.setPower(.7);
         while (opModeIsActive() && motorLeftDriveDown.isBusy())   //leftMotor.getCurrentPosition() < leftMotor.getTargetPosition())
         {
             telemetry.addData("encoder-fwd-left-down", motorLeftDriveDown.getCurrentPosition() + "  busy=" + motorLeftDriveDown.isBusy());
@@ -474,17 +524,11 @@ public class auto_sensor_test extends LinearOpMode {
     private void move_back() {
 
         // Changing the motor direction to go backward
-        motorLeftDriveDown.setDirection(DcMotor.Direction.FORWARD);
-        motorRightDriveDown.setDirection(DcMotor.Direction.REVERSE);
-        motorLeftDriveUp.setDirection(DcMotor.Direction.FORWARD);
-        motorRightDriveUp.setDirection(DcMotor.Direction.REVERSE);
+        motorLeftDriveDown.setDirection(DcMotor.Direction.REVERSE);
+        motorRightDriveDown.setDirection(DcMotor.Direction.FORWARD);
+        motorLeftDriveUp.setDirection(DcMotor.Direction.REVERSE);
+        motorRightDriveUp.setDirection(DcMotor.Direction.FORWARD);
 
-
-        // reset encoder counts kept by motors.
-
-
-        // Calculate the number of ticks corresponding to x inches
-        // Request motor to RUN_TO_POSITION for those number of ticks
 
 
         motorLeftDriveDown.setPower(.25);
@@ -832,7 +876,7 @@ public class auto_sensor_test extends LinearOpMode {
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam");
+       // parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam");
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -860,12 +904,16 @@ public class auto_sensor_test extends LinearOpMode {
 
     private void tilt(long milliseconds, double power){
         servoTilterDrive.setDirection(CRServo.Direction.FORWARD);
+        rightservoDrive.setDirection(DcMotorSimple.Direction.FORWARD);
         long starttime = System.currentTimeMillis();
         servoTilterDrive.setPower(power);
+        rightservoDrive.setPower(-power);
         while((System.currentTimeMillis() - starttime) < milliseconds) {
 
         }
+
         servoTilterDrive.setPower(0);
+        rightservoDrive.setPower(0);
 
     }
 
@@ -874,11 +922,11 @@ public class auto_sensor_test extends LinearOpMode {
          private void spin(int x){
             // int total_ticks = getTotal_ticks(x);
         motorSpinnerDrive.setDirection(DcMotor.Direction.FORWARD);
-        motorSpinnerDrive_left.setDirection(DcMotorSimple.Direction.FORWARD);
+        //motorSpinnerDrive_left.setDirection(DcMotorSimple.Direction.FORWARD);
        // motorSpinnerDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
      //   motorSpinnerDrive.setTargetPosition(total_ticks);
        // motorSpinnerDrive.setMode(DcMotor.RunMode. RUN_TO_POSITION);
-             motorSpinnerDrive_left.setPower(.7);
+           //  motorSpinnerDrive_left.setPower(.7);
              motorSpinnerDrive.setPower(.7);
              while (opModeIsActive() && motorSpinnerDrive.isBusy())   //leftMotor.getCurrentPosition() < leftMotor.getTargetPosition())
              {
@@ -888,16 +936,16 @@ public class auto_sensor_test extends LinearOpMode {
              }
              sleep(4500);
         motorSpinnerDrive.setPower(0);
-        motorSpinnerDrive_left.setPower(0);
+        //motorSpinnerDrive_left.setPower(0);
          }
     private void spinop(int x){
         // int total_ticks = getTotal_ticks(x);
         motorSpinnerDrive.setDirection(DcMotor.Direction.REVERSE);
-        motorSpinnerDrive_left.setDirection(DcMotorSimple.Direction.REVERSE);
+      //  motorSpinnerDrive_left.setDirection(DcMotorSimple.Direction.REVERSE);
         // motorSpinnerDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //   motorSpinnerDrive.setTargetPosition(total_ticks);
         // motorSpinnerDrive.setMode(DcMotor.RunMode. RUN_TO_POSITION);
-        motorSpinnerDrive_left.setPower(.7);
+       // motorSpinnerDrive_left.setPower(.7);
         motorSpinnerDrive.setPower(.7);
         while (opModeIsActive() && motorSpinnerDrive.isBusy())   //leftMotor.getCurrentPosition() < leftMotor.getTargetPosition())
         {
@@ -907,36 +955,73 @@ public class auto_sensor_test extends LinearOpMode {
         }
         sleep(4500);
         motorSpinnerDrive.setPower(0);
-        motorSpinnerDrive_left.setPower(0);
+        //motorSpinnerDrive_left.setPower(0);
     }
 
 
 public void path1() {
-    moveXrail(11);
-       // make_a_turn(rotate_dir.ROTATE_FORWARD_RIGHT,12);
-    strafe_right(15);
-        move_forward(13);
-        tilt(50,.2);
-    sleep(400);
-    tilt(150,.2);
-    move_backward(15);
-    strafe_right(51);
-    spin(200);
-    move_forward(20);
-        //method for tilting servo to drop
-}
-public void path2(){
-        sleep(100);
-    moveXrail(19);
- // make_a_turn(rotate_dir.ROTATE_FORWARD_RIGHT, 9);
-    strafe_right(25);
-    sleep(600);
-    move_forward(14);
-    tilt(150,.2);
-    move_backward(15);
-    strafe_right(52);
-    spin(200);
-    move_forward(20);
+   move_forward(5);
+tilt(4500,1);
+    }
+public void path2(int x,double y,double z){
+
+    int total_ticks = getTotal_ticks(x);
+
+    // Changing the motor direction to go backward
+
+    motorLeftDriveUp.setDirection(DcMotor.Direction.REVERSE);
+    motorRightDriveUp.setDirection(DcMotor.Direction.FORWARD);
+    motorLeftDriveDown.setDirection(DcMotor.Direction.REVERSE);
+    motorRightDriveDown.setDirection(DcMotor.Direction.FORWARD);
+
+
+    // reset encoder counts kept by motors.
+    motorLeftDriveDown.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    motorRightDriveDown.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    motorLeftDriveUp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    motorRightDriveUp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    // Calculate the number of ticks corresponding to x inches
+    // Request motor to RUN_TO_POSITION for those number of ticks
+
+    motorLeftDriveDown.setTargetPosition(total_ticks);
+    motorRightDriveDown.setTargetPosition(total_ticks);
+    motorLeftDriveUp.setTargetPosition(total_ticks);
+    motorRightDriveUp.setTargetPosition(total_ticks);
+
+    motorLeftDriveDown.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    motorRightDriveDown.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    motorLeftDriveUp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    motorRightDriveUp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+    motorLeftDriveDown.setPower(.7);
+    motorRightDriveDown.setPower(.7);
+    motorLeftDriveUp.setPower(.7);
+    motorRightDriveUp.setPower(.7);
+    servoTilterDrive.setDirection(CRServo.Direction.FORWARD);
+    long starttime = System.currentTimeMillis();
+    servoTilterDrive.setPower(y);
+    while((System.currentTimeMillis() - starttime) < z) {
+
+    }
+
+    servoTilterDrive.setPower(0);
+
+    while (opModeIsActive() && motorLeftDriveDown.isBusy())   //leftMotor.getCurrentPosition() < leftMotor.getTargetPosition())
+    {
+        telemetry.addData("encoder-fwd-left-down", motorLeftDriveDown.getCurrentPosition() + "  busy=" + motorLeftDriveDown.isBusy());
+        telemetry.addData("encoder-fwd-right-down", motorRightDriveDown.getCurrentPosition() + "  busy=" + motorRightDriveDown.isBusy());
+        telemetry.addData("encoder-fwd-left-up", motorLeftDriveUp.getCurrentPosition() + "  busy=" + motorLeftDriveUp.isBusy());
+        telemetry.addData("encoder-fwd-right-down", motorRightDriveUp.getCurrentPosition() + "  busy=" + motorRightDriveUp.isBusy());
+        telemetry.update();
+        idle();
+    }
+    motorLeftDriveDown.setPower(0);
+    motorRightDriveDown.setPower(0);
+    motorLeftDriveUp.setPower(0);
+    motorRightDriveUp.setPower(0);
+
 
     //method for servo to drop
 }
